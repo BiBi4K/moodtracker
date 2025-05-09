@@ -38,7 +38,7 @@ class CNN(nn.Module):
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.relu = nn.ReLU()
 
-        dummy_input = torch.zeros(1, 3, 40, 40)
+        dummy_input = torch.zeros(1, 3, 48, 48)
         dummy_output = self._forward_conv(dummy_input)
         flattened_size = dummy_output.view(1, -1).size(1)
 
@@ -65,7 +65,7 @@ class CNN(nn.Module):
         return x
 
 transform_train = transforms.Compose([
-    transforms.RandomResizedCrop(40, scale=(0.8, 1.2)),
+    transforms.RandomResizedCrop(48, scale=(0.8, 1.2)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomVerticalFlip(),
     transforms.RandomRotation(10),
