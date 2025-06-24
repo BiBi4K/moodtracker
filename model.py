@@ -302,14 +302,14 @@ if __name__ == '__main__':
     optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True, weight_decay=1e-3)
     scheduler = ReduceLROnPlateau(optimizer, 'min', patience=7, factor=0.7, min_lr=5e-5)
     main_training_epochs = 150
-    best_epoch, all_metrics = train(model, train_loader, val_loader, test_loader, criterion, optimizer, scheduler, num_epochs=main_training_epochs, save_dir='D:\\studia\\AI\\mood')
+    best_epoch, all_metrics = train(model, train_loader, val_loader, test_loader, criterion, optimizer, scheduler, num_epochs=main_training_epochs, save_dir='D:\\moodtracker')
     
     print("Starting fine-tuning...")
     for param in model.model.parameters():
         param.requires_grad = True
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, nesterov=True, weight_decay=1e-3)
     scheduler = ReduceLROnPlateau(optimizer, 'min', patience=7, factor=0.7, min_lr=5e-5)
-    best_epoch, all_metrics = train(model, train_loader, val_loader, test_loader, criterion, optimizer, scheduler, num_epochs=100, save_dir='D:\\studia\\AI\\mood', start_epoch=main_training_epochs, all_metrics=all_metrics)
+    best_epoch, all_metrics = train(model, train_loader, val_loader, test_loader, criterion, optimizer, scheduler, num_epochs=100, save_dir='D:\\moodtracker', start_epoch=main_training_epochs, all_metrics=all_metrics)
     
     print("Loading best model for evaluation...")
     checkpoint = torch.load('D:/studia/AI/mood/model.pth', map_location=device)
