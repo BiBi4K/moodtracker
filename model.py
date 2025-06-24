@@ -17,7 +17,6 @@ import os
 import pandas as pd
 from PIL import Image
 
-# Custom Dataset for FERPlus
 class FERPlusDataset(Dataset):
     def __init__(self, image_dir, label_file, transform=None):
         self.image_dir = image_dir
@@ -33,9 +32,7 @@ class FERPlusDataset(Dataset):
         img_name = self.labels_df.iloc[idx, 0]
         img_path = os.path.join(self.image_dir, img_name)
         image = Image.open(img_path)
-        # Get votes from columns 2-9 (indices 2 to 9 in 0-based indexing)
         votes = self.labels_df.iloc[idx, 2:10].values.astype(int)
-        # Select class with maximum votes
         label = np.argmax(votes)
         
         if self.transform:
@@ -43,7 +40,6 @@ class FERPlusDataset(Dataset):
         
         return image, label
 
-# Define ResNetEmocje model with ResNet50
 class ResNetEmocje(nn.Module):
     def __init__(self, num_classes=8):
         super(ResNetEmocje, self).__init__()
@@ -78,7 +74,6 @@ class ResNetEmocje(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-# Data augmentation
 transform_train = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     transforms.RandomResizedCrop(48, scale=(0.8, 1.0)),
@@ -98,7 +93,6 @@ transform_test = transforms.Compose([
     transforms.Normalize(mean=[0.5], std=[0.5])
 ])
 
-# Evaluate function for accuracy and loss per epoch
 def evaluate_epoch(model, data_loader, criterion, device):
     model.eval()
     correct = 0
@@ -118,13 +112,11 @@ def evaluate_epoch(model, data_loader, criterion, device):
     avg_loss = running_loss / len(data_loader)
     return accuracy, avg_loss
 
-# Training function without early stopping
 def train(model, train_loader, val_loader, test_loader, criterion, optimizer, scheduler, num_epochs, save_dir='D:\\studia\\AI\\mood', start_epoch=0, all_metrics=None):
     print("Starting training...")
     os.makedirs(save_dir, exist_ok=True)
     model_path = os.path.join(save_dir, 'model.pth')
 
-    # Initialize metrics if None (first phase) or extend existing ones (fine-tuning)
     if all_metrics is None:
         all_metrics = {
             'train_accuracies': [],
@@ -186,7 +178,6 @@ def train(model, train_loader, val_loader, test_loader, criterion, optimizer, sc
     print(f"Best model saved from epoch {best_epoch} with Val Acc: {best_acc:.2f}%")
     return best_epoch, all_metrics
 
-# Evaluate function for final metrics
 def evaluate(model, test_loader, class_names, criterion, device):
     print("Evaluating model...")
     model.eval()
@@ -217,12 +208,10 @@ def evaluate(model, test_loader, class_names, criterion, device):
     cm_accuracy = np.divide(cm, cm.sum(axis=1)[:, np.newaxis], out=np.zeros_like(cm, dtype=float), where=cm.sum(axis=1)[:, np.newaxis] != 0)
     return cm, cm_accuracy
 
-# Plotting function for accuracy and loss
 def plot_metrics(all_metrics, main_training_epochs, save_path='D:/studia/AI/mood/metrics_plot.png'):
     print("Plotting metrics...")
     plt.figure(figsize=(12, 12))
     
-    # Plot accuracy
     plt.subplot(2, 1, 1)
     plt.plot(all_metrics['train_accuracies'], label='Training Accuracy', color='blue')
     plt.plot(all_metrics['val_accuracies'], label='Validation Accuracy', color='orange')
@@ -234,7 +223,6 @@ def plot_metrics(all_metrics, main_training_epochs, save_path='D:/studia/AI/mood
     plt.grid(True, which='both', linestyle='--', linewidth=0.5)
     plt.minorticks_on()
     
-    # Plot loss
     plt.subplot(2, 1, 2)
     plt.plot(all_metrics['train_losses'], label='Training Loss', color='blue')
     plt.plot(all_metrics['val_losses'], label='Validation Loss', color='orange')
@@ -250,7 +238,6 @@ def plot_metrics(all_metrics, main_training_epochs, save_path='D:/studia/AI/mood
     plt.savefig(save_path)
     plt.close()
 
-# Plot confusion matrix
 def plot_confusion_matrix(cm, cm_accuracy, class_names, save_path='D:/studia/AI/mood/cm_plot.png'):
     print("Plotting confusion matrix...")
     plt.figure(figsize=(10, 6))

@@ -11,10 +11,8 @@ import face_recognition
 from mtcnn import MTCNN
 
 
-# Definicja klas emocji
 class_names = ['neutral', 'happiness', 'surprise', 'sadness', 'anger', 'disgust', 'fear', 'contempt']
 
-# Definicja transformacji
 transform_test = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     transforms.Resize(48),
@@ -43,19 +41,16 @@ tta_transforms = [
     ])
 ]
 
-# Wczytanie modelu
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ResNetEmocje().to(device)
 checkpoint = torch.load('model.pth', map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
-# Inicjalizacja MTCNN, jeśli dostępny
 mtcnn_detector = MTCNN()
 
 
 def predict_emotion(image, detector_choice):
-    # If image is a NumPy array, convert it to a PIL Image object
     if isinstance(image, np.ndarray):
         image = Image.fromarray(image)
     
@@ -66,18 +61,17 @@ def predict_emotion(image, detector_choice):
     if detector_choice == 'mtcnn':
         try:
             detections = mtcnn_detector.detect_faces(rgb_image)
-            print(f"MTCNN: Wykryto {len(detections)} twarzy")  # Debugowanie
+            print(f"MTCNN: Wykryto {len(detections)} twarzy")
             for det in detections:
                 if det['confidence'] > 0.9:
                     x, y, w, h = det['box']
-                    faces.append((y, y+h, x, x+w))  # top, bottom, left, right
+                    faces.append((y, y+h, x, x+w))
         except Exception as e:
             print(f"Błąd MTCNN: {e}")
     elif detector_choice == 'hog':
         try:
             face_locations = face_recognition.face_locations(rgb_image, model="hog")
-            print(f"HOG: Wykryto {len(face_locations)} twarzy")  # Debugowanie
-            # Konwersja formatu HOG (top, right, bottom, left) na (top, bottom, left, right)
+            print(f"HOG: Wykryto {len(face_locations)} twarzy")
             faces = [(top, bottom, left, right) for (top, right, bottom, left) in face_locations]
         except Exception as e:
             print(f"Błąd HOG: {e}")
@@ -89,7 +83,6 @@ def predict_emotion(image, detector_choice):
 
     if not faces:
         warning = f"Uwaga: Nie wykryto twarzy za pomocą {detector_choice}. Predykcja może być niewiarygodna."
-        # Predykcja na całym obrazie
         input_image = image
         probabilities = []
         with torch.no_grad():
@@ -122,7 +115,6 @@ def predict_emotion(image, detector_choice):
             except Exception as e:
                 print(f"Błąd podczas przetwarzania twarzy: {e}")
 
-    # Rysowanie ramek
     draw = ImageDraw.Draw(image)
     for res in results:
         if res["box"]:
@@ -130,12 +122,10 @@ def predict_emotion(image, detector_choice):
             draw.rectangle([left, top, right, bottom], outline="red", width=2)
             draw.text((left, top - 10), f"{res['emotion']} ({res['confidence']*100:.2f}%)", fill="red")
 
-    # Przygotowanie tekstu wyjściowego
     output_text = warning + "\n" if warning else ""
     for res in results:
         output_text += f"Emocja: {res['emotion']} ({res['confidence']*100:.2f}%)\n"
 
-    # Generowanie wykresu
     plot_path = None
     if len(results) > 1:
         emotions = [res["emotion"] for res in results]
@@ -146,7 +136,6 @@ def predict_emotion(image, detector_choice):
 
     return image, output_text, plot_path
 
-# Funkcje generujące wykresy
 def create_probability_plot(probabilities):
     plt.figure(figsize=(8, 4))
     sns.barplot(x=np.array(probabilities) * 100, y=class_names, palette='Blues_d')
@@ -173,7 +162,6 @@ def create_emotion_histogram(emotions):
         plt.close()
     return plot_path
 
-# Interfejs Gradio
 with gr.Blocks() as demo:
     gr.Markdown("# MoodTracker – Rozpoznawanie Emocji")
     gr.Markdown("Prześlij zdjęcie lub użyj kamery. Dokładność modelu: 80%")
