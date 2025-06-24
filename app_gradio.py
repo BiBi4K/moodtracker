@@ -46,7 +46,7 @@ tta_transforms = [
 # Wczytanie modelu
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ResNetEmocje().to(device)
-checkpoint = torch.load('best_resnet_emocje_model.pth', map_location=device)
+checkpoint = torch.load('model.pth', map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
 model.eval()
 
@@ -190,4 +190,4 @@ with gr.Blocks() as demo:
 
     predict_button.click(fn=predict_emotion, inputs=[image_input, detector_choice], outputs=[output_image, output_text, output_plot])
 
-demo.launch(server_name="127.0.0.1", server_port=7860, share=True)
+demo.launch(server_name="127.0.0.1", server_port=7860)
