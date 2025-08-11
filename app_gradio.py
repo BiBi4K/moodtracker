@@ -56,7 +56,6 @@ def predict_emotion(image, detector_choice):
     
     rgb_image = np.array(image.convert('RGB'))
     
-    # Detekcja twarzy
     faces = []
     if detector_choice == 'mtcnn':
         try:
